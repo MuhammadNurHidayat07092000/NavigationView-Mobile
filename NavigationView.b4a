@@ -1,0 +1,213 @@
+﻿Version=7.3
+NumberOfModules=2
+Module1=mn_Data
+Module2=mn_dataInput
+Build1=Default,example.navigationview
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: http://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="9" android:targetSdkVersion="24"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~'End of default text.~\n~~\n~SetApplicationAttribute(android:theme, "@style/MyAppTheme")~\n~~\n~'Tell the system that we want to draw the SystemBarBackgrounds and~\n~'make the StatusBar transparent.~\n~CreateResource(values, theme.xml,~\n~<resources>~\n~    <style name="MyAppTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">~\n~        <item name="colorPrimary">#0098FF</item>~\n~        <item name="colorPrimaryDark">#007CF5</item>~\n~        <item name="colorAccent">#FF5522</item>~\n~        <item name="windowNoTitle">true</item>~\n~        <item name="windowActionBar">false</item>~\n~		<item name="android:windowDrawsSystemBarBackgrounds">true</item>~\n~    	<item name="android:statusBarColor">@android:color/transparent</item>~\n~    </style>~\n~</resources>~\n~)~\n~
+IconFile=
+NumberOfFiles=7
+File1=Layout_Data.bal
+File2=Layout_Input.bal
+File3=layout1.bal
+File4=material-wallpaper.jpg
+File5=navHeaderLayout.bal
+File6=navHeaderLayout2.bal
+File7=tanya.png
+NumberOfLibraries=8
+Library1=core
+Library2=appcompat
+Library3=designsupport
+Library4=ahviewpager
+Library5=xmllayoutbuilder
+Library6=http
+Library7=okhttputils2
+Library8=json
+@EndOfDesignText@
+#Region  Project Attributes 
+	#ApplicationLabel: Menu_Android
+	#VersionCode: 1
+	#VersionName: 1.00
+	'SupportedOrientations possible values: unspecified, landscape or portrait.
+	#SupportedOrientations: unspecified
+	#CanInstallToExternalStorage: False
+#End Region
+
+#AdditionalRes: "..\resource"
+#Extends: android.support.v7.app.AppCompatActivity
+
+#Region  Activity Attributes 
+	#FullScreen: False
+	#IncludeTitle: True
+#End Region
+
+Sub Process_Globals
+   Public IP As String
+End Sub
+
+Sub Globals
+
+	Private VP As AHViewPager
+	Private PC As AHPageContainer
+	Private TabLayout As DSTabLayout
+	Private ToolBar As ACToolBarLight
+	
+	Private NavDrawer As DSNavigationDrawer
+	Private HeaderLabel As Label
+End Sub
+
+#Region Activity Events
+Sub Activity_Create(FirstTime As Boolean)
+	Dim xml As XmlLayoutBuilder
+
+	NavDrawer.Initialize2("NavDrawer", Activity, NavDrawer.DefaultDrawerWidth, NavDrawer.GRAVITY_START)
+	IP="192.168.43.31"
+    Activity.LoadLayout("layout1")
+	ToolBar.Title="Sistem Informasi Mahasiswa"
+	NavDrawer.InitDrawerToggle
+	
+	ToolBar.InitMenuListener
+	NavDrawer.NavigationView.LoadLayout( "navheaderLayout.bal", NavDrawer.DefaultHeaderHeight)
+	
+	NavDrawer.NavigationView.Menu.AddWithGroup2(1, 1, 1, "Home", xml.GetDrawable("ic_home_black_24dp")).Checked = True
+	
+	NavDrawer.NavigationView.Menu.AddWithGroup2(2, 10, 1000, "Data Mahasiswa", xml.GetDrawable("ic_settings_black_24dp"))
+	NavDrawer.NavigationView.Menu.AddWithGroup2(2, 11, 1000, "Input Mahasiswa", xml.GetDrawable("ic_input_black_24dp"))
+	NavDrawer.NavigationView.Menu.AddWithGroup2(2, 12, 1100, "Feedback", xml.GetDrawable("ic_feedback_black_24dp"))
+	NavDrawer.NavigationView.Menu.AddWithGroup2(2, 13, 1200, "Bantuan", xml.GetDrawable("ic_help_black_24dp"))
+	NavDrawer.NavigationView.Menu.AddWithGroup2(2, 14, 1200, "Keluar", xml.GetDrawable("ic_close_black_24dp"))
+	'NavDrawer.NavigationView.Menu.AddWithGroup2(2, 14, 1300, "Coba", xml.GetDrawable("ic_close_black_24dp"))
+	
+	'Tambah menu program
+	NavDrawer.NavigationView.Menu.SetGroupCheckable(2, True, True)
+
+	NavDrawer.AddSecondaryDrawer(150dip, NavDrawer.GRAVITY_END)
+	NavDrawer.SecondaryNavigationView.LoadLayout("navHeaderLayout2", 100dip)
+	HeaderLabel.Text = "Fist Header"
+	NavDrawer.SecondaryNavigationView.LoadLayout("navHeaderLayout2", 50dip)
+	HeaderLabel.Text = "Second Header"
+	NavDrawer.SecondaryNavigationView.ItemIconColor = Colors.Red
+	NavDrawer.SecondaryNavigationView.SetItemTextColors(Colors.Gray, Colors.Red, Colors.Red, Colors.LightGray)
+	
+	Dim subMenu As ACSubMenu
+	subMenu = NavDrawer.SecondaryNavigationView.Menu.AddSubMenu(3, 20, 20, "Pages")
+	PC.Initialize
+	For i = 0 To 2
+		Dim p As Panel		
+		p.Initialize("")
+		p.Color = Colors.RGB(Rnd(0,256), Rnd(0,256), Rnd(0,256))		
+		Dim pageName As String
+		pageName = "Page " & i
+		PC.AddPage(p, pageName)
+		subMenu.AddWithGroup2(3, 100+i, 100+i, pageName, xml.GetDrawable("ic_bookmark_black_24dp"))
+	Next
+	NavDrawer.SecondaryNavigationView.CheckedItem = 100
+	subMenu.SetGroupCheckable(3, True, True)
+	VP.PageContainer = PC
+	
+	Dim Ac As AppCompat
+	TabLayout.Color = Ac.GetThemeAttribute("colorPrimary")
+	TabLayout.SetViewPager(VP)
+End Sub
+
+Sub Activity_Resume
+
+End Sub
+
+Sub Activity_Pause (UserClosed As Boolean)
+
+End Sub
+
+'We need to handle the Keypress and check if one of the drawers is currently open. If yes,
+'just close them and not close the Activity.
+Sub Activity_KeyPress (KeyCode As Int) As Boolean 'Return True to consume the event
+	If KeyCode = KeyCodes.KEYCODE_BACK Then
+		Log("Close the drawers on back key press")
+		If NavDrawer.IsDrawerOpen2(NavDrawer.GRAVITY_START) Or NavDrawer.IsDrawerOpen2(NavDrawer.GRAVITY_END) Then
+			NavDrawer.CloseDrawers
+		  Return True
+		End If
+	End If
+	
+	Return False
+End Sub
+#End Region
+
+#Region Viewpager Events
+Sub VP_PageChanged (Position As Int)
+	Log("PageChanged: " & Position)
+	
+	'Set the correct Page Item in the NavigationDrawer to the selected one.
+	For i = 0 To 2
+		If i = Position Then
+			NavDrawer.SecondaryNavigationView.Menu.FindItem(i+100).Checked = True
+		Else
+			NavDrawer.SecondaryNavigationView.Menu.FindItem(i+100).Checked = False
+		End If
+	Next
+End Sub
+
+Sub VP_PageCreated (Position As Int, Page As Object)
+	Log("PageCreated: " & Position)
+End Sub
+
+Sub VP_PageDestroyed (Position As Int, Page As Object)
+	Log("PageDestroyed: " & Position)
+End Sub
+
+Sub VP_PageScrolled (Position As Int, PositionOffset As Float, PositionOffsetPixels As Int)
+	'Log("PageScrolled: " & Position & " Offset: " & PositionOffset & " OffsetPixels: " & PositionOffsetPixels) 
+End Sub
+
+Sub VP_PageScrollStateChanged (State As Int)
+	Log("StateChange: " & State)
+End Sub
+#End Region
+
+#Region Navdrawer Events
+Sub NavDrawer_DrawerClosed (DrawerGravity As Int)
+	LogColor("NavDrawer closed", Colors.Green)
+End Sub
+
+Sub NavDrawer_DrawerOpened (DrawerGravity As Int)
+	LogColor("NavDrawer opened", Colors.Green)
+End Sub
+
+Sub NavDrawer_DrawerSlide (Position As Float, DrawerGravity As Int)
+	LogColor("NavDrawer Slide: " & Position, Colors.Blue)
+End Sub
+
+'Event sub that handles the case if a navigation item is selected.
+Sub NavDrawer_NavigationItemSelected (MenuItem As ACMenuItem, DrawerGravity As Int)
+	If MenuItem.Id = 1 Then'jika klik home
+		Msgbox("Home","Di Klik")
+	Else If MenuItem.Id = 10 Then'jika klik data mahasiswa
+		StartActivity(mn_Data)
+		Else If MenuItem.Id = 11 Then
+			StartActivity(mn_dataInput)
+	Else If MenuItem.Id= 14 Then
+		Dim Tanya As Int = Msgbox2("Anda Yakin Keluar Aplikasi ..?","Informasi", "Ya", "Tidak", "",LoadBitmap(File.DirAssets,"tanya.png"))
+		If Tanya = DialogResponse.Positive Then
+			ExitApplication
+		End If
+	End If
+
+	NavDrawer.NavigationView.CheckedItem = MenuItem.Id
+	
+	If MenuItem.Id >= 100 Then
+		VP.GotoPage(MenuItem.Id - 100, True)
+	End If
+	
+	NavDrawer.CloseDrawer2(DrawerGravity)
+End Sub
+#End Region
+
+#Region ToolBar Events
+'Open or Close the drawer if the Toolbar HomeButton is clicked.
+Sub Toolbar_NavigationItemClick
+	If NavDrawer.IsDrawerOpen Then
+		NavDrawer.CloseDrawer
+	Else
+		NavDrawer.OpenDrawer
+	End If
+End Sub
+#End Region
